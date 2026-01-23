@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김권일 본부장님 생신 축하 룰렛</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; background: radial-gradient(circle, #fff5f5, #ffe3e3);
+            font-family: 'Malgun Gothic', sans-serif; overflow: hidden;
+        }
+        h1 { color: #d63031; text-align: center; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); line-height: 1.4; }
+        .game-wrapper { position: relative; width: 500px; height: 500px; }
+        #wheelCanvas { 
+            width: 100%; height: 100%; border-radius: 50%; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); border: 10px solid #fff;
+            background-color: white;
+        }
+        .arrow {
+            position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent;
+            border-top: 40px solid #ff4757; z-index: 30; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
+        }
+        .boss-center {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 160px; height: 160px; z-index: 20; background-color: transparent;
+            border: none; border-radius: 50%; overflow: hidden; pointer-events: none;
+        }
+        .boss-center img { width: 100%; height: 100%; object-fit: cover; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); }
+        .controls { margin-top: 40px; text-align: center; }
+        button {
+            padding: 16px 70px; font-size: 1.6rem; font-weight: bold; color: white;
+            background: linear-gradient(45deg, #d63031, #fd79a8); border: none; border-radius: 50px;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 8px 20px rgba(214, 48, 49
