@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>김권일 본부장님 생신 축하 룰렛</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box;
+            background: radial-gradient(circle, #fff5f5, #ffe3e3);
+            font-family: 'Malgun Gothic', sans-serif; overflow-x: hidden;
+        }
+        h1 { 
+            color: #d63031; text-align: center; margin-bottom: 30px; 
+            font-size: clamp(1.2rem, 5vw, 2rem); line-height: 1.4; 
+        }
+        
+        .main-container { 
+            display: flex; flex-direction: row; align-items: center; 
+            gap: 40px; position: relative; width: 100%; max-width: 900px; justify-content: center;
+        }
+
+        .game-wrapper { 
+            position: relative; width: 100%; max-width: 500px; aspect-ratio: 1 / 1; 
+        }
+        #wheelCanvas { 
+            width: 100%; height: 100%; border-radius: 50%; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); border: clamp(5px, 2vw, 10px) solid #fff;
+            background-color: white; will-change: transform;
+        }
+        .arrow {
+            position: absolute; top: -7%; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent;
+            border-top: 40px solid #ff4757; z-index: 30;
+        }
+        .boss-center {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 32%; height: 32%; z-index: 20; background-color: transparent;
+            border-radius: 50%; overflow: hidden; pointer-events: none;
+        }
+        .boss-center img { width: 100%; height: 100%; object-fit: cover; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); }
+
+        .right-sidebar {
+            display: flex; flex-direction: column; align-items: center; position: relative;
+        }
+
+        .doodle-area { margin-bottom: 20px; margin-left: -50px; } /* 룰렛 쪽으로 더 밀착 */
+        .doodle-text {
+            font-family: 'Nanum Pen Script', cursive; color: #d63031;
+            font-size: clamp(2rem, 8vw, 3.2rem); line-height: 1; transform: rotate(-8deg);
+            z-index: 50; text-align: center; white-space: nowrap;
+        }
+
+        .post-it {
+            width: 180px; padding: 20px; background-color: #fff9c4;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1); transform: rotate(2deg);
+            border-left: 1px solid rgba(0,0,0,0.05); font-size: 0.85rem;
+            line-height: 1.5; color: #333;
+        }
+        .post-it-title { font-weight: bold; color: #d32f2f; margin-bottom: 8px; border-bottom: 1px dashed #d32f2f; display: inline-block; }
+
+        .controls { margin-top: 40px; text-align: center; width: 100%; }
+        button {
+            padding: 16px min(70px, 15vw); font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: bold; color: white;
+            background: linear-gradient(45deg, #d63031, #fd79a8); border: none; border-radius: 50px;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 8px 20px rgba(214, 48, 49, 0.3);
+        }
+
+        #result-text { margin-top: 25px; font-size: clamp(1.2rem, 4vw, 1.8rem); font-weight: bold; color: #2d3436; min-height: 45px; text-align: center; }
+
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; gap: 20px; }
+            .doodle-area { margin-left: 0; margin-top: 10px; }
+            .post-it { width: 90%; max-width: 250px; transform: rotate(0); }
+            body { justify-content: flex-start; padding-top: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎂 김권일 본부장님! 생일 축하드립니다! 🎂</h1>
+
+    <div class="main-container">
+        <div class="game-wrapper">
+            <div class="arrow"></div>
+            <canvas id="wheelCanvas" width="600" height="600"></canvas>
+            <div class="boss-center">
+                <img src="boss_face.png" alt="본부장님" onerror="this.style.display='none';">
+            </div>
+        </div>
+
+        <div class="right-sidebar">
+            <div class="doodle-area">
+                <div class="doodle-text">가보시죠!<br>GO!</div>
+            </div>
+
+            <div class="post-it">
+                <div class="post-it-title">📌 룰렛 돌리기 규칙</div>
+                <p><strong>1. 연습게임:</strong><br>연습을 원하실 경우 단 3번만 가능!</p>
+                <p><strong>2. 꽝 재도전:</strong><br>꽝이 나왔을 땐 '가위바위보'에서 슬미를 이기면 재도전 가능!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="spinBtn">START!</button>
+        <div id="result-text"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultText = document.getElementById('result-text');
+
+        // 요청하신 항목으로 업데이트 및 줄바꿈 기호(\n) 삽입
+        const prizes = [
+            "슬미의 장기근속\n(28년도까지 재직)", "점심 식사 이용권", "맨투맨(의류) 👕", "슬미의 2시간 야근", "간식 찬스 🍪🍬", 
+            "꽝! 💣", "저녁 식사 이용권", "꽝! 💣", "힘찬 박수 👏🏼", "KBO 야구 관람권\n(LG vs SSG) ⚾"
+        ];
+        
+        const colors = [
+            "#ff7675", "#fdcb6e", "#e17055", "#00b894", "#0984e3", 
+            "#6c5ce7", "#d63031", "#b2bec3", "#fab1a0", "#e67e22" 
+        ];
+
+        let currentRotation = 0;
+        let isSpinning = false;
+
+        function drawWheel() {
+            const numSegments = prizes.length;
+            const segmentAngle = (2 * Math.PI) / numSegments;
+            ctx.clearRect(0, 0, 600, 600);
+
+            prizes.forEach((prize, i) => {
+                const angle = i * segmentAngle;
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(300, 300);
+                ctx.arc(300, 300, 300, angle, angle + segmentAngle);
+                ctx.fill();
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(300, 300);
+                ctx.rotate(angle + segmentAngle / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "white";
+
+                // 폰트 설정 수정
+                if (prize.includes("꽝!")) {
+                    ctx.font = "bold 40px 'Malgun Gothic'";
+                } else if (prize.includes("힘찬 박수")) {
+                    ctx.font = "bold 26px 'Malgun Gothic'"; // 박수 글자 크기 대폭 확대
+                } else if (prize.includes("\n")) {
+                    ctx.font = "bold 16px 'Malgun Gothic'"; // 두 줄 텍스트용 적당한 크기
+                } else {
+                    ctx.font = "bold 18px 'Malgun Gothic'";
+                }
+
+                // 줄바꿈 렌더링 로직 추가
+                const lines = prize.split('\n');
+                if (lines.length > 1) {
+                    ctx.fillText(lines[0], 280, -2);
+                    ctx.fillText(lines[1], 280, 22);
+                } else {
+                    ctx.fillText(prize, 280, 10);
+                }
+                
+                ctx.restore();
+            });
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            spinBtn.disabled = true;
+            resultText.innerText = "운명의 시간이 다가옵니다... 두구두구...";
+
+            const randomRotate = Math.floor(Math.random() * 360) + 7200; 
+            currentRotation += randomRotate;
+
+            // 20초 슬로우 모션
+            canvas.style.transition = "transform 20s cubic-bezier(0.05, 0, 0, 1)";
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                spinBtn.disabled = false;
+                const actualDegree = currentRotation % 360;
+                const segmentAngle = 360 / prizes.length;
+                const winningIndex = Math.floor((360 - actualDegree + 270) % 360 / segmentAngle);
+                const winner = prizes[winningIndex];
+
+                // 결과창에는 한 줄로 예쁘게 출력
+                resultText.innerHTML = `🎊 [ <span style="color:#d63031;">${winner.replace('\n', ' ')}</span> ] 당첨! 축하드려요! 🎉`;
+                
+                confetti({ particleCount: 250, spread: 100, origin: { y: 0.6 } });
+            }, 20000); 
+        }
+
+        spinBtn.addEventListener('click', spinWheel);
+        drawWheel();
+    </script>
+</body>
+</html>
